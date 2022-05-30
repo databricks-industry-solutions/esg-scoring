@@ -28,7 +28,7 @@ ___
 
 | library                                | description             | license    | source                                              |
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
-| beautifulsoup4                         | Web scraper library     | MIT        | https://www.crummy.com/software/BeautifulSoup       |
+| beautifulsoup4                         | Web scraper             | MIT        | https://www.crummy.com/software/BeautifulSoup       |
 | PyPDF2                                 | PDF parser              | BSD        | https://pypi.org/project/PyPDF2                     |
 | Gensim                                 | NLP toolkit             | L-GPL2     | https://radimrehurek.com/gensim/                    |
 | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
