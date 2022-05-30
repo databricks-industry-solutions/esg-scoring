@@ -20,7 +20,7 @@ ___
 
 ___
 
-<img src='https://github.com/databricks-industry-solutions/esg_scoring/blob/gcp/images/reference_architecture.png' width=800>
+<img src='images/reference_architecture.png' width=800>
 
 ___
 
