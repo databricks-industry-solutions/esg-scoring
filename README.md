@@ -33,4 +33,4 @@ ___
 | Gensim                                 | NLP toolkit             | L-GPL2     | https://radimrehurek.com/gensim/                    |
 | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
 | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
-| Wordcloud                              | Visualization library   | MIT        | https://github.com/amueller/word_cloud              |
+| Wordcloud                              | Visualization           | MIT        | https://github.com/amueller/word_cloud              |
