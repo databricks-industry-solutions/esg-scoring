@@ -27,13 +27,6 @@ class UtilTest(unittest.TestCase):
         text = "Sentence: Sundar Pichai, the CEO of Google Inc. is walking in the streets of California."
         self.assertEqual("sentenc sundar pichai googl walk street california", lemmatize_text(text))
 
-    def test_stop_words(self):
-        if not os.path.exists('dist'):
-            os.mkdir('dist')
-        nltk.download('wordnet', download_dir='dist/wordnet')
-        nltk.download('punkt', download_dir='dist/punkt')
-        self.assertTrue('googl' in get_stopwords(['Google Inc'], 'dist'))
-
 
 if __name__ == '__main__':
     unittest.main()

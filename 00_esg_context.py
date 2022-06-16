@@ -35,7 +35,6 @@
 # MAGIC |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
 # MAGIC | beautifulsoup4                         | Web scraper library     | MIT        | https://www.crummy.com/software/BeautifulSoup       |
 # MAGIC | PyPDF2                                 | PDF parser              | BSD        | https://pypi.org/project/PyPDF2                     |
-# MAGIC | Gensim                                 | NLP toolkit             | L-GPL2     | https://radimrehurek.com/gensim/                    |
 # MAGIC | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
 # MAGIC | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
 # MAGIC | Wordcloud                              | Visualization library   | MIT        | https://github.com/amueller/word_cloud              |

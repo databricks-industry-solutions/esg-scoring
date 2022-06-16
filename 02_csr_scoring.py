@@ -59,8 +59,13 @@ display(esg_df.select('organization', 'sector', 'statement'))
 
 # COMMAND ----------
 
-organizations = list(csr_df.select('organization').distinct().toPandas().organization)
-stop_words = get_stopwords(organizations, nltk_path)
+# read default stopwords
+with open('config/stopwords.txt', 'r') as f:
+  stop_words = f.read().split('\n')
+  
+# consider organisations names as stop words
+organizations = list(csr_df.select('organization').distinct().toPandas().organization)  
+stop_words = get_stopwords(stop_words, organizations, nltk_path)
 
 # COMMAND ----------
 
