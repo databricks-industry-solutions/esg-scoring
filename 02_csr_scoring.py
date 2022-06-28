@@ -9,7 +9,7 @@
 
 # COMMAND ----------
 
-model_name = config['model']['tagger']['name']
+model_name = config['model']['name']
 csr_gold   = config['database']['tables']['csr']['gold']
 csr_bronze = config['database']['tables']['csr']['bronze']
 csr_silver = config['database']['tables']['csr']['silver']
@@ -124,6 +124,10 @@ best_params = fmin(
   trials=spark_trials, 
   rstate=rstate
 )
+
+# COMMAND ----------
+
+best_params
 
 # COMMAND ----------
 
@@ -274,12 +278,23 @@ gold_df = (
 
 # COMMAND ----------
 
+_ = (
+  gold_df
+    .write
+    .format('delta')
+    .mode('overwrite')
+    .saveAsTable(csr_gold)
+)
+
+# COMMAND ----------
+
 _ = sql("OPTIMIZE {} ZORDER BY ticker".format(csr_gold))
 
 # COMMAND ----------
 
 esg_group = spark.read.table(csr_gold).filter(F.col('ticker').isin(portfolio)).toPandas()
 esg_group = esg_group.merge(topic_df, on='id')[['organization', 'policy', 'probability']]
+display(esg_group)
 
 # COMMAND ----------
 
@@ -336,11 +351,11 @@ class EsgTopicAPI(mlflow.pyfunc.PythonModel):
     import nltk
     import re
     from nltk.stem import WordNetLemmatizer, PorterStemmer
-    from gensim.utils import simple_preprocess
+    from utils.nlp_utils import tokenize
     results = []
     lemmatizer = WordNetLemmatizer()
     stemmer = PorterStemmer()
-    for token in simple_preprocess(text):
+    for token in tokenize(text):
       stem = stemmer.stem(lemmatizer.lemmatize(token))
       matcher = re.match('\w+', stem)
       if matcher:
@@ -363,7 +378,6 @@ with mlflow.start_run(run_name=model_name):
 
   conda_env = mlflow.pyfunc.get_default_conda_env()
   conda_env['dependencies'][2]['pip'] += ['scikit-learn=={}'.format(sklearn.__version__)]
-  conda_env['dependencies'][2]['pip'] += ['gensim=={}'.format(gensim.__version__)]
   conda_env['dependencies'][2]['pip'] += ['nltk=={}'.format(nltk.__version__)]
   conda_env['dependencies'][2]['pip'] += ['pandas=={}'.format(pd.__version__)]
   conda_env['dependencies'][2]['pip'] += ['numpy=={}'.format(np.__version__)]
@@ -388,9 +402,14 @@ version = result.version
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC We can also promote our model to different stages programmatically. Although our models would need to be reviewed in real life scenario, we make it available as a production artifact for our next notebook and programmatically transition previous runs back to Archive.
+
+# COMMAND ----------
+
 client = mlflow.tracking.MlflowClient()
 for model in client.search_model_versions("name='{}'".format(model_name)):
-  if model.current_stage == 'Staging':
+  if model.current_stage == 'Production':
     print("Archiving model version {}".format(model.version))
     client.transition_model_version_stage(
       name=model_name,
@@ -404,7 +423,7 @@ client = mlflow.tracking.MlflowClient()
 client.transition_model_version_stage(
     name=model_name,
     version=version,
-    stage='Staging'
+    stage="Production"
 )
 
 # COMMAND ----------
@@ -477,3 +496,7 @@ esg_csr_data.plot.bar(
   ylim=[0, 100],
   figsize=(16, 8)
 )
+
+# COMMAND ----------
+
+

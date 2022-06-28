@@ -33,3 +33,4 @@ ___
 | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
 | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
 | Wordcloud                              | Visualization           | MIT        | https://github.com/amueller/word_cloud              |
+| PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |

@@ -1,8 +1,7 @@
 
 model:
-  tagger:
-    # name of the NLP model that will be registered on MLFlow registry
-    name: 'esg_tagger'
+  # name of the NLP model that will be registered on MLFlow registry
+  name: 'solacc_esg'
   spacy:
     # directory must be accessible from each executor
     # we will download latest spacy pre-trained pipeline for entity resolution
@@ -30,7 +29,7 @@ bigquery:
 
 database:
   # all delta tables will be stored as external managed tables under that database / within that directory
-  name: 'esg'
+  name: 'solacc_esg'
   path: '/FileStore/solution_accelerators/esg/database'
   tables:
     portfolio: 'portfolio'

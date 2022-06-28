@@ -28,8 +28,8 @@ display(gdelt_df)
 
 def load_model():
   import mlflow
-  model_name = config['model']['tagger']['name']
-  return mlflow.pyfunc.load_model("models:/{}/staging".format(model_name))
+  model_name = config['model']['name']
+  return mlflow.pyfunc.load_model("models:/{}/production".format(model_name))
 
 # COMMAND ----------
 
@@ -46,10 +46,16 @@ def classify(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
 # COMMAND ----------
 
 from pyspark.sql import functions as F
+
+# COMMAND ----------
+
+from pyspark.sql import functions as F
 from utils.spark_utils import *
  
 _ = (
   gdelt_df
+    # ignore translation titles, we need to have enough text for NLP model inference
+    .filter(F.length(F.trim(F.regexp_replace(F.lower('title'), '&[#\w]*;', ''))) > 100)
     .withColumn('probabilities', classify('title'))
     .withColumn('probabilities', with_topic('probabilities'))
     .withColumn('relevance', F.col('org_contribution') * F.col('gkg_contribution'))
@@ -178,10 +184,11 @@ esg_talk = spark.read.table(csr_scores_table).withColumnRenamed('score', 'talk')
 display(
   esg_walk
     .join(esg_talk, ['ticker', 'id'])
+    .join(organizations_df, ['ticker'])
     .join(topics_df, ['id'])
     .withColumn('walkTheTalk', F.col('walk') - F.col('talk'))
     .orderBy(F.desc('walkTheTalk'))
-    .select('ticker', 'topic', 'policy', 'walk', 'talk')
+    .select('ticker', 'organization', 'topic', 'policy', 'walk', 'talk')
 )
 
 # COMMAND ----------

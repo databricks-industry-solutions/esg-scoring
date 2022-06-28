@@ -126,7 +126,13 @@ for sector in sectors.keys():
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC Since we've stored many chunks of data, we may want to optimize our table and delete previous versions. This is done through the `OPTIMIZE` and `VACUUM` commands respectively.
+
+# COMMAND ----------
+
 _ = sql("OPTIMIZE {}".format(csr_table_bronze))
+_ = sql("VACUUM {}".format(csr_table_bronze))
 display(spark.read.table(csr_table_bronze))
 
 # COMMAND ----------

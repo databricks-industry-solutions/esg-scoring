@@ -1,6 +1,5 @@
 beautifulsoup4==4.10.0
 PyPDF2==1.26.0
-gensim==4.1.2
 nltk==3.6.1
 wordcloud==1.8.1
 spacy==3.2.1

@@ -31,26 +31,29 @@ import nltk
 # one can call those methods to download models if needed
 spacy_path = config['model']['spacy']['path']
 if not os.path.exists(spacy_path):
+  print("Downloading SPACY model to {}".format(spacy_path))
   os.mkdir(spacy_path)
   spacy.cli.download("en_core_web_sm")
   nlp = spacy.load('en_core_web_sm')
   nlp.to_disk(spacy_path)
 
-  
 nltk_path = config['model']['nltk']['path']
 if not os.path.exists(nltk_path):
+  print("Downloading NLTK model to {}".format(nltk_path))
   os.mkdir(nltk_path)
-  
-if not os.path.exists("{}/wordnet".format(nltk_path)):
   nltk.download('wordnet', download_dir="{}/wordnet".format(nltk_path))
-  
-if not os.path.exists("{}/punkt".format(nltk_path)):
   nltk.download('punkt', download_dir="{}/punkt".format(nltk_path))
 
 # COMMAND ----------
 
 with open('config/portfolio.txt', 'r') as f:
   portfolio = f.read().split('\n')
+
+# COMMAND ----------
+
+import mlflow
+username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
+mlflow.set_experiment('/Users/{}/{}'.format(username, config['model']['name']))
 
 # COMMAND ----------
 

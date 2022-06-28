@@ -247,7 +247,6 @@ _ = (
 # COMMAND ----------
 
 _ = sql("OPTIMIZE {} ZORDER BY ticker".format(gdelt_bronze_table))
-display(spark.read.table(gdelt_bronze_table))
 
 # COMMAND ----------
 

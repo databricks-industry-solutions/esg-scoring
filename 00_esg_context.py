@@ -3,7 +3,7 @@
 # MAGIC <img src=https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/fs-lakehouse-logo-transparent.png width="600px">
 # MAGIC 
 # MAGIC [![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](.)
-# MAGIC [![CLOUD](https://img.shields.io/badge/CLOUD-n1--highmem--16-blue?logo=googlecloud&style=for-the-badge)]()
+# MAGIC [![CLOUD](https://img.shields.io/badge/CLOUD-GCP-blue?logo=googlecloud&style=for-the-badge)]()
 # MAGIC [![POC](https://img.shields.io/badge/POC-5 days-green?style=for-the-badge)]()
 # MAGIC 
 # MAGIC *The future of finance goes hand in hand with social responsibility, environmental stewardship and corporate ethics. 
@@ -38,3 +38,4 @@
 # MAGIC | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
 # MAGIC | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
 # MAGIC | Wordcloud                              | Visualization library   | MIT        | https://github.com/amueller/word_cloud              |
+# MAGIC | PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
