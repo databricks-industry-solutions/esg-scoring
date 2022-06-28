@@ -15,6 +15,8 @@ volatility ([source](https://corpgov.law.harvard.edu/2020/01/14/esg-matters/)).
 In this solution, we offer a novel approach to sustainable finance by combining NLP techniques and news analytics to 
 extract key strategic ESG initiatives and learn companies' commitments to corporate responsibility.*
 
+<img src=https://databricks.com/wp-content/uploads/2022/03/03.png width=600>
+
 ___
 <antoine.amend@databricks.com>
 
