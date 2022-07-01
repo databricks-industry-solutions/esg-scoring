@@ -7,6 +7,7 @@ def load_nltk(path):
     import nltk
     nltk.data.path.append("{}/wordnet".format(path))
     nltk.data.path.append("{}/punkt".format(path))
+    nltk.data.path.append("{}/omw".format(path))
 
 
 def load_spacy(path):
@@ -36,7 +37,7 @@ def extract_organizations(text, nlp):
 
 def tokenize(sentence):
     import re
-    return [t for t in re.split('\W', sentence.lower()) if len(t) > 0]
+    return [t for t in re.split('\\W', sentence.lower()) if len(t) > 0]
 
 
 def lemmatize_text(text):
@@ -45,7 +46,7 @@ def lemmatize_text(text):
     stemmer = PorterStemmer()
     for token in tokenize(text):
         stem = stemmer.stem(lemmatizer.lemmatize(token))
-        matcher = re.match('\w+', stem)
+        matcher = re.match('\\w+', stem)
         if matcher:
             part = matcher.group(0)
             if len(part) > 3:
@@ -58,8 +59,8 @@ def get_stopwords(stop_words, organisations, path):
     org_stop_words = []
     for organisation in organisations:
         for t in re.split('\\W', organisation):
-            l = lemmatize_text(t)
-            if len(l) > 0:
-                org_stop_words.append(l)
+            lemma = lemmatize_text(t)
+            if len(lemma) > 0:
+                org_stop_words.append(lemma)
     stop_words = stop_words + org_stop_words
     return stop_words

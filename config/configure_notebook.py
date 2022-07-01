@@ -43,6 +43,7 @@ if not os.path.exists(nltk_path):
   os.mkdir(nltk_path)
   nltk.download('wordnet', download_dir="{}/wordnet".format(nltk_path))
   nltk.download('punkt', download_dir="{}/punkt".format(nltk_path))
+  nltk.download('omw-1.4', download_dir="{}/omw".format(nltk_path))
 
 # COMMAND ----------
 

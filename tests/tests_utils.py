@@ -27,6 +27,7 @@ class UtilTest(unittest.TestCase):
     def test_lemmatize_text(self):
         nltk.download('wordnet')
         nltk.download('punkt')
+        nltk.download('omw-1.4')
         text = "Sentence: Sundar Pichai, the CEO of Google Inc. is walking in the streets of California."
         self.assertEqual("sentenc sundar pichai googl walk street california", lemmatize_text(text))
 
