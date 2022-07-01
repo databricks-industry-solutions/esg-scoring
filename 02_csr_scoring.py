@@ -25,25 +25,22 @@ csr_scores = config['database']['tables']['csr']['scores']
 
 # COMMAND ----------
 
-from utils.nlp_utils import *
-
-# COMMAND ----------
-
 from pyspark.sql.functions import pandas_udf
 from typing import Iterator
 import pandas as pd
+from utils.nlp_utils import *
 
 @pandas_udf('string')
-def lemmatize_text_udf(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
-  load_nltk(nltk_path)
-  for xs in batch_iter:
-    yield xs.apply(lemmatize_text)
+def lemmatize(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
+    load_nltk(nltk_path)
+    for xs in batch_iter:
+        yield xs.apply(lemmatize_text)
 
 # COMMAND ----------
 
 from pyspark.sql import functions as F
 csr_df = spark.read.table(csr_silver)
-esg_df = csr_df.withColumn('lemma', lemmatize_text_udf(F.col('statement')))
+esg_df = csr_df.withColumn('lemma', lemmatize(F.col('statement')))
 esg_df = esg_df.filter(F.length('lemma') > 255)
 corpus = esg_df.select('lemma').toPandas().lemma
 
@@ -223,12 +220,12 @@ plt.savefig("/tmp/{}_wordcloud.png".format(model_name))
 import pandas as pd
 
 topic_df = pd.DataFrame([
-  [0, 'S', 'valuing employee'],
-  [1, 'G', 'code of conduct'],
-  [2, 'G', 'board of directors'],
-  [3, 'G', 'risk management'],
-  [4, 'S', 'supporting communities'],
-  [5, 'E', 'energy transition']
+  [0, 'G', 'corporate disclosure'],
+  [1, 'G', 'global market'],
+  [2, 'E', 'environmental impact'],
+  [3, 'E', 'sustainable future'],
+  [4, 'G', 'corporate strategy'],
+  [5, 'S', 'supporting workforce']
 ], columns=['id', 'topic', 'policy'])
 
 # COMMAND ----------
@@ -338,37 +335,39 @@ plt.show()
 
 # COMMAND ----------
 
+import mlflow
+
 class EsgTopicAPI(mlflow.pyfunc.PythonModel):
     
-  def __init__(self, pipeline):
-    self.pipeline = pipeline  
-    
-  def load_context(self, context): 
-    import nltk
-    nltk.download('wordnet')
+    def __init__(self, pipeline):
+        self.pipeline = pipeline  
 
-  def _lemmatize(self, text):
-    import nltk
-    import re
-    from nltk.stem import WordNetLemmatizer, PorterStemmer
-    from utils.nlp_utils import tokenize
-    results = []
-    lemmatizer = WordNetLemmatizer()
-    stemmer = PorterStemmer()
-    for token in tokenize(text):
-      stem = stemmer.stem(lemmatizer.lemmatize(token))
-      matcher = re.match('\w+', stem)
-      if matcher:
-        part = matcher.group(0)
-        if len(part) > 3:
-          results.append(part)
-    return ' '.join(results)
+    def load_context(self, context): 
+        import nltk
+        nltk.download('wordnet')
 
-  def predict(self, context, series):
-    lemma = series.apply(self._lemmatize)
-    predictions = pipeline.transform(lemma)
-    import pandas as pd
-    return pd.Series([[float(p) for p in distribution] for distribution in predictions])
+    def _lemmatize(self, text):
+        import nltk
+        import re
+        from nltk.stem import WordNetLemmatizer, PorterStemmer
+        from utils.nlp_utils import tokenize
+        results = []
+        lemmatizer = WordNetLemmatizer()
+        stemmer = PorterStemmer()
+        for token in tokenize(text):
+            stem = stemmer.stem(lemmatizer.lemmatize(token))
+            matcher = re.match('\w+', stem)
+            if matcher:
+                part = matcher.group(0)
+                if len(part) > 3:
+                    results.append(part)
+        return ' '.join(results)
+
+    def predict(self, context, series):
+        lemma = series.apply(self._lemmatize)
+        predictions = self.pipeline.transform(lemma)
+        import pandas as pd
+        return pd.Series([[float(p) for p in distribution] for distribution in predictions])
 
 # COMMAND ----------
 

@@ -3,6 +3,11 @@
 
 # COMMAND ----------
 
+import warnings
+warnings.filterwarnings("ignore")
+
+# COMMAND ----------
+
 import yaml
 with open('config/application.yaml', 'r') as f:
   config = yaml.safe_load(f)

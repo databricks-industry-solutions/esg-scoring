@@ -16,7 +16,7 @@ gdelt_bronze_table = config['database']['tables']['gdelt']['bronze']
 
 # MAGIC %md
 # MAGIC ## News dataset
-# MAGIC [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery with new increment available every 15mn.
+# MAGIC [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery or flat files with new increment available every 15mn
 
 # COMMAND ----------
 
