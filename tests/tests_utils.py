@@ -2,7 +2,6 @@ import unittest
 
 import spacy
 import nltk
-import os
 
 from utils.nlp_utils import *
 
@@ -10,8 +9,12 @@ from utils.nlp_utils import *
 class UtilTest(unittest.TestCase):
 
     def test_org_clean(self):
-        cleansed = clean_org_name('Hello World Limited')
-        self.assertEqual('hello world', cleansed)
+        stop_words = ['group', 'inc', 'ltd', 'ag', 'plc', 'limited', 'sa', 'holdings']
+        for stop_word in stop_words:
+            cleansed = clean_org_name('Hello World {}'.format(stop_word))
+            self.assertEqual('hello world', cleansed)
+        cleansed = clean_org_name('Hello World Antoine')
+        self.assertEqual('hello world antoine', cleansed)
 
     def test_extract_organizations(self):
         spacy.cli.download("en_core_web_sm")

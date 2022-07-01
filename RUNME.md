@@ -5,8 +5,6 @@ Based on previous implementations, we estimate the time for an overall POC durat
 
 ## [00_configure_notebook](config/configure_notebook.py)
 
-[![POC](https://img.shields.io/badge/_-ARBITRARY_FILE-lightgray?style=for-the-badge)]()
-
 Although executed through multiple notebooks, this solution is configured using external configuration file. 
 See [application.yaml](config/application.yaml) for more information about each configuration item. 
 This configuration will be used in [configure_notebook](config/configure_notebook.py) and 'injected' in each notebook 
@@ -20,9 +18,6 @@ external table or as job argument.
 
 ## [01_csr_download](./01_csr_download.py.py)
 
-[![POC](https://img.shields.io/badge/_-SCRAPING-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-NLP-lightgray?style=for-the-badge)]()
-
 ### Download CSRs
 
 You will need to support outbound HTTP accesses from your databricks workspace. 
@@ -33,10 +28,6 @@ Just like many web scraping processes, please proceed with extra caution and ref
 [T&Cs](https://www.responsibilityreports.com/Disclaimer) before doing so.
 
 ## [02_csr_scoring](./02_csr_scoring.py)
-
-[![POC](https://img.shields.io/badge/_-NLP-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-VISUALIZATION-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-HYPEROPT-lightgray?style=for-the-badge)]()
 
 ### Text preprocessing
 
@@ -128,10 +119,6 @@ all public organization to a delta and big query tables.
 
 ## [03_gdelt_download](./03_gdelt_download.py)
 
-[![POC](https://img.shields.io/badge/_-BIGQUERY-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-PYSPARK-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-NLP-lightgray?style=for-the-badge)]()
-
 ### News dataset
 
 Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery with new increment available every 15mn.
@@ -176,9 +163,6 @@ organizations it mentions. We save each matching news alongside organization con
 `config['database']['tables']['gdelt']['bronze']`.
 
 ## [04_gdelt_scoring](04_gdelt_scoring.py)
-
-[![POC](https://img.shields.io/badge/_-VISUALIZATION-lightgray?style=for-the-badge)]()
-[![POC](https://img.shields.io/badge/_-BIGQUERY-lightgray?style=for-the-badge)]()
 
 ### ESG scoring
 
@@ -226,7 +210,6 @@ understand risk exposure, back test trading strategies and optimize portfolio. S
 architecture
 
 <img src='images/reference_architecture_final.png' width=800>
-
 
 # Issues
 
