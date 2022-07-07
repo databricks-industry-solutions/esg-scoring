@@ -24,7 +24,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src='https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/esg_scoring/gcp/images/reference_architecture.png' width=800>
+# MAGIC <img src='https://raw.githubusercontent.com/databricks-industry-solutions/esg-scoring/gcp/images/reference_architecture.png' width=800>
 
 # COMMAND ----------
 
