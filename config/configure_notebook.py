@@ -59,7 +59,7 @@ with open('config/portfolio.txt', 'r') as f:
 
 import mlflow
 username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-mlflow.set_experiment('/Users/{}/esg'.format(username))
+mlflow.set_experiment('/Users/{}/esg_scoring'.format(username))
 
 # COMMAND ----------
 
