@@ -2,7 +2,7 @@
 
 [![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/10.4ml.html)
 [![CLOUD](https://img.shields.io/badge/CLOUD-GCP-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
-[![POC](https://img.shields.io/badge/POC-5 days-green?style=for-the-badge)](https://databricks.com/try-databricks)
+[![POC](https://img.shields.io/badge/POC-5_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
 
 *The future of finance goes hand in hand with social responsibility, environmental stewardship and corporate ethics. 
 In order to stay competitive, Financial Services Institutions (FSI)  are increasingly  disclosing more information 
