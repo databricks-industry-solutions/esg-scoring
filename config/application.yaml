@@ -18,15 +18,10 @@ csr:
   
 gdelt:
   # gdelt v2 dataset spans from 1970 to today and updated every 15mn
+  raw: '/mnt/industry-gtm/fsi/datasets/gdelt_gkg_raw'
   # we recommend reading at least 2 months worth of data to capture enough news information for each company
-  mindate: 20220101000000
-  maxdate: 20220401000000
-
-bigquery:
-  # gdelt v2 dataset is available on bigquery and updated every 15mn
-  # see: https://www.gdeltproject.org/data.html#googlebigquery
-  gdelt: 'gdelt-bq:gdeltv2.gkg'
-
+  dir: '/mnt/industry-gtm/fsi/datasets/gdelt_gkg'
+  
 database:
   # all delta tables will be stored as external managed tables under that database / within that directory
   name: 'solacc_esg'

@@ -9,14 +9,41 @@
 
 # COMMAND ----------
 
-gdelt_bquery_table = config['bigquery']['gdelt']
-gdelt_bronze_table = config['database']['tables']['gdelt']['bronze']
+# MAGIC %md
+# MAGIC ## News dataset
+# MAGIC Supported by Google Jigsaw, the [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Although it is convenient to scrape for [master URL]((http://data.gdeltproject.org/gdeltv2/lastupdate.txt) file to process latest GDELT increment, processing 2 years backlog is time consuming and resource intensive (please **proceed with caution**). Below script is for illustration purpose only on a small time window. 
+# MAGIC 
+# MAGIC ```
+# MAGIC from utils.gdelt_download import download
+# MAGIC max_date = datetime.today()
+# MAGIC min_date = max_date - timedelta(hours=1)
+# MAGIC download(min_date, max_date, config['gdelt']['raw'])
+# MAGIC ```
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## News dataset
-# MAGIC [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery or flat files with new increment available every 15mn
+# MAGIC The structure of GDELT GKGv2 files is complex (see [data model](http://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf)). Because of its complex taxonomy, some fields may be separated by comma, spaces and nested entities separated by hash or semi columns. We make use of a scala library to access schematized records as a clean dataframe rather than handling this business logic ourselves. 
+# MAGIC 
+# MAGIC ```
+# MAGIC %python
+# MAGIC # We pass some configuration parameters from python to scala via the spark configuration
+# MAGIC spark.conf.set('gdelt.raw.path', config['gdelt']['raw'])
+# MAGIC spark.conf.set('gdelt.bronze.path', config['gdelt']['dir'])
+# MAGIC ```
+# MAGIC 
+# MAGIC ```
+# MAGIC %scala
+# MAGIC import com.aamend.spark.gdelt._
+# MAGIC 
+# MAGIC spark
+# MAGIC   .read
+# MAGIC   .gdeltGkgV2(spark.conf.get("gdelt.raw.path"))
+# MAGIC   .write
+# MAGIC   .format("delta")
+# MAGIC   .mode("append")
+# MAGIC   .save(spark.conf.get("gdelt.bronze.path"))
+# MAGIC ```
 
 # COMMAND ----------
 
@@ -25,11 +52,9 @@ from pyspark.sql import functions as F
 gdelt_raw = (
   spark
     .read
-    .format("bigquery")
-    .option("table", gdelt_bquery_table)
-    .load()
-    .filter(F.col('DATE') >  config['gdelt']['mindate'])
-    .filter(F.col('DATE') <= config['gdelt']['maxdate'])
+    .format("delta")
+    .load(config['gdelt']['dir'])
+    .filter(F.col('gkgRecordId.translingual') == False)
 )
 
 # COMMAND ----------
@@ -43,8 +68,8 @@ display(gdelt_raw)
 # We search for United Nation Guiding Principles (S), Economy related news (G) and environmental (E) as first proxy 
 gdelt_urls = (
   gdelt_raw
-    .withColumnRenamed('DocumentIdentifier', 'url')
-    .withColumn('theme', F.explode(F.split('Themes', ';')))
+    .withColumnRenamed('documentIdentifier', 'url')
+    .withColumn('theme', F.explode('themes'))
     .filter(F.split(F.col('theme'), '_')[0].isin(['ENV', 'ECON', 'UNGP']))
     .select('url')
     .distinct()
@@ -67,17 +92,16 @@ def lemmatize_text_udf(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
 
 gdelt_esg = (
   gdelt_raw
-    .withColumn('title', F.regexp_extract(F.col('Extras'), '<PAGE_TITLE>(.*)</PAGE_TITLE>', 1))
-    .withColumn('publishDate', F.to_timestamp(F.expr('CAST(DATE AS STRING)'), 'yyyyMMddHHmmss'))
+    .withColumn('title', F.regexp_extract(F.col('extrasXML'), '<PAGE_TITLE>(.*)</PAGE_TITLE>', 1))
     .select(
       F.col('publishDate'),
-      F.split(F.col('Organizations'), ';').alias('organizations'),
-      F.col('DocumentIdentifier').alias('url'),
-      F.col('SourceCommonName').alias('source'),
+      F.col('organisations'),
+      F.col('documentIdentifier').alias('url'),
+      F.col('sourceCommonName').alias('source'),
       F.col('title'),
-      F.split(F.col('V2Tone'), ',')[0].alias('tone')
+      F.col('tone.tone').alias('tone')
     )
-    .filter(F.size(F.col('organizations')) > 0)                 # at least one organization must be mentioned
+    .filter(F.size(F.col('organisations')) > 0)                 # at least one organization must be mentioned
     .join(gdelt_urls, ['url'])                                  # only retrieve news with esg theme candidates
     .filter(F.length(lemmatize_text_udf(F.col('title'))) > 50)  # title should have been extracted
 )

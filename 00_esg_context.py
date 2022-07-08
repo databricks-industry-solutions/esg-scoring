@@ -3,8 +3,8 @@
 # MAGIC <img src=https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/fs-lakehouse-logo-transparent.png width="600px">
 # MAGIC 
 # MAGIC [![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/10.4ml.html)
-# MAGIC [![CLOUD](https://img.shields.io/badge/CLOUD-GCP-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
-# MAGIC [![POC](https://img.shields.io/badge/POC-5 days-green?style=for-the-badge)](https://databricks.com/try-databricks)
+# MAGIC [![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
+# MAGIC [![POC](https://img.shields.io/badge/POC-10 days-green?style=for-the-badge)](https://databricks.com/try-databricks)
 # MAGIC 
 # MAGIC *The future of finance goes hand in hand with social responsibility, environmental stewardship and corporate ethics. 
 # MAGIC In order to stay competitive, Financial Services Institutions (FSI)  are increasingly  disclosing more information 
@@ -39,3 +39,4 @@
 # MAGIC | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
 # MAGIC | Wordcloud                              | Visualization library   | MIT        | https://github.com/amueller/word_cloud              |
 # MAGIC | PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
+# MAGIC | spark-gdelt                            | GDELT wrapper           | Apache2    | https://github.com/aamend/spark-gdelt               |
