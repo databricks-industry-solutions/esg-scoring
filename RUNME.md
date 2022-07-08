@@ -113,7 +113,7 @@ client.transition_model_version_stage(
 
 In that last section, we tie those insights together to create a basic score that captures the communication coverage 
 from CSR disclosure. We only visualize organizations in our [portfolio](config/portfolio.txt), though we've stored
-all public organization to a delta and big query tables.
+all public organization to a delta table.
 
 <img src='images/1_scores.png' width=600>
 
@@ -121,19 +121,14 @@ all public organization to a delta and big query tables.
 
 ### News dataset
 
-Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery with new increment available every 15mn.
-Please be mindful of the data available on bigquery as the entire dataset is around 2Tb and spans over 50 years. 
-We recommend reading only a few months, controlled with `config['gdelt']['mindate']` and `config['gdelt']['maxdate']` 
-configuration parameters.
+Supported by Google Jigsaw, GDELT datasets are available on Google BigQuery (see GCP branch) and flat files with new increment available every 15mn.
+Please be mindful of the data available as the entire dataset is around 2Tb and spans over 50 years. 
 
 ```python
-gdelt_raw = (
-  spark
-    .read
-    .format("bigquery")
-    .option("table", config['bigquery']['gdelt'])
-    .load()
-)
+from utils.gdelt_download import download
+max_date = datetime.today()
+min_date = max_date - timedelta(hours=1)
+download(min_date, max_date, config['gdelt']['raw'])
 ```
 
 ### Organization contribution
@@ -202,14 +197,6 @@ Finally, we join our 2 scores together (the one derived from our CSR and the one
 visualization representing the over-communication or under-communication to look out for.
 
 <img src='images/2_walktalk.png' width=600>
-
-# Next steps
-
-With a POC up and running, the next logical step is to embed portfolio analysis and market risk calculations to better 
-understand risk exposure, back test trading strategies and optimize portfolio. See below a suggested reference 
-architecture
-
-<img src='images/reference_architecture_final.png' width=800>
 
 # Issues
 
