@@ -345,6 +345,8 @@ class EsgTopicAPI(mlflow.pyfunc.PythonModel):
     def load_context(self, context): 
         import nltk
         nltk.download('wordnet')
+        nltk.download('punkt')
+        nltk.download('omw-1.4')
 
     def _lemmatize(self, text):
         import nltk
