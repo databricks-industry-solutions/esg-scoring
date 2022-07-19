@@ -46,10 +46,6 @@ def classify(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
 # COMMAND ----------
 
 from pyspark.sql import functions as F
-
-# COMMAND ----------
-
-from pyspark.sql import functions as F
 from utils.spark_utils import *
  
 _ = (

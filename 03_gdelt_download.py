@@ -11,28 +11,32 @@
 
 # MAGIC %md
 # MAGIC ## News dataset
-# MAGIC Supported by Google Jigsaw, the [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Although it is convenient to scrape for [master URL]((http://data.gdeltproject.org/gdeltv2/lastupdate.txt) file to process latest GDELT increment, processing 2 years backlog is time consuming and resource intensive (please **proceed with caution**). Below script is for illustration purpose only on a small time window. 
-# MAGIC 
-# MAGIC ```
-# MAGIC from utils.gdelt_download import download
-# MAGIC max_date = datetime.today()
-# MAGIC min_date = max_date - timedelta(hours=1)
-# MAGIC download(min_date, max_date, config['gdelt']['raw'])
-# MAGIC ```
+# MAGIC Supported by Google Jigsaw, the [GDELT](https://www.gdeltproject.org/) Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world. Although it is convenient to scrape for [master URL]((http://data.gdeltproject.org/gdeltv2/lastupdate.txt) file to process latest GDELT increment, processing 2 years backlog is time consuming and resource intensive (please **proceed with caution**). Below script is for illustration purpose only on a small time window (1h). 
+
+# COMMAND ----------
+
+from datetime import datetime
+from datetime import timedelta
+from utils.gdelt_download import download
+
+max_date = datetime.today()
+min_date = max_date - timedelta(hours=1)
+dbutils.fs.mkdirs(config['gdelt']['raw'])
+download(min_date, max_date, config['gdelt']['raw'])
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The structure of GDELT GKGv2 files is complex (see [data model](http://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf)). Because of its complex taxonomy, some fields may be separated by comma, spaces and nested entities separated by hash or semi columns. We make use of a scala library to access schematized records as a clean dataframe rather than handling this business logic ourselves. 
-# MAGIC 
-# MAGIC ```
-# MAGIC %python
-# MAGIC # We pass some configuration parameters from python to scala via the spark configuration
-# MAGIC spark.conf.set('gdelt.raw.path', config['gdelt']['raw'])
-# MAGIC spark.conf.set('gdelt.bronze.path', config['gdelt']['dir'])
-# MAGIC ```
-# MAGIC 
-# MAGIC ```
+# MAGIC The structure of GDELT GKGv2 files is complex (see [data model](http://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf)). Because of its complex taxonomy, some fields may be separated by comma, spaces and nested entities separated by hash or semi columns. We make use of scala library `com.aamend.spark:spark-gdelt:3.0` to access schematized records as a clean dataframe rather than handling this business logic ourselves. 
+
+# COMMAND ----------
+
+# We pass some configuration parameters from python to scala via the spark configuration
+spark.conf.set('gdelt.raw.path', config['gdelt']['raw'])
+spark.conf.set('gdelt.dir.path', config['gdelt']['dir'])
+
+# COMMAND ----------
+
 # MAGIC %scala
 # MAGIC import com.aamend.spark.gdelt._
 # MAGIC 
@@ -42,8 +46,7 @@
 # MAGIC   .write
 # MAGIC   .format("delta")
 # MAGIC   .mode("append")
-# MAGIC   .save(spark.conf.get("gdelt.bronze.path"))
-# MAGIC ```
+# MAGIC   .save(spark.conf.get("gdelt.dir.path"))
 
 # COMMAND ----------
 
@@ -184,8 +187,8 @@ def clean_org_name_udf(text):
 gkg_org_tf = (
   gdelt_raw
     .select(
-      F.split(F.col('Organizations'), ';').alias('organizations'), 
-      F.col('DocumentIdentifier').alias('url')
+      F.col('organisations').alias('organizations'), 
+      F.col('documentIdentifier').alias('url')
     )
     .withColumn('organization', F.explode(F.col('organizations')))
     .withColumn('organization', clean_org_name_udf(F.col('organization')))
@@ -248,6 +251,10 @@ esg_coverage = (
       F.col('gkg_contribution')
     )
 )
+
+# COMMAND ----------
+
+gdelt_bronze_table = config['database']['tables']['gdelt']['bronze']
 
 # COMMAND ----------
 
