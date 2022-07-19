@@ -37,7 +37,6 @@ database:
       scores: 'csr_scores'
     gdelt:
       # storing all GDELT related information
-      contributions: 'gdelt_contributions'
       bronze: 'gdelt_bronze'
       silver: 'gdelt_silver'
       scores: 'gdelt_scores'

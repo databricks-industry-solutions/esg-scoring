@@ -8,18 +8,17 @@ import os
 import urllib.request
 
 
-def download_content(url, save_path):
+def download_content(url, file_name):
     with urllib.request.urlopen(url) as dl_file:
         input_zip = ZipFile(io.BytesIO(dl_file.read()), "r")
         name = input_zip.namelist()[0]
-        with gzip.open(save_path, 'wb') as f:
+        with gzip.open(file_name, 'wb') as f:
             f.write(input_zip.read(name))
 
 def download_to_dbfs(url, dst_path):
     file_name = '{}.gz'.format(url.split('/')[-1][:-4])
-    tmp_file = '{}/{}'.format(temp_directory, file_name)
-    download_content(url, tmp_file)
-    dbutils.fs.mv('file:{}'.format(tmp_file), 'dbfs:{}/{}'.format(dst_path, file_name))
+    # write to a mounted directory
+    download_content(url, '/dbfs/{}/{}'.format(dst_path, file_name))
     
 def download(min_date, max_date, dst_path):
     master_url = 'http://data.gdeltproject.org/gdeltv2/masterfilelist.txt'
@@ -37,7 +36,7 @@ def download(min_date, max_date, dst_path):
     print("{} file(s) to download from {} to {}".format(len(to_download), min_date, max_date))
     n = len(to_download)
     for i, url in enumerate(to_download):
-        download_to_dbfs(url)
+        download_to_dbfs(url, dst_path)
         print("{}/{} [{}]".format(i + 1, n, url))
 
 
