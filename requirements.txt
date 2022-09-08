@@ -1,6 +1,0 @@
-beautifulsoup4==4.10.0
-PyPDF2==2.4.1
-nltk==3.6.6
-wordcloud==1.8.1
-spacy==3.2.1
-PyYAML==6.0
