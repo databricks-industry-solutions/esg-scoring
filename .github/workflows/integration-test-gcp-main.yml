@@ -17,7 +17,7 @@ jobs:
        with:
          local-notebook-path: RUNME.py
          git-branch: main
-         databricks-host: ${{ secrets.DEPLOYMENT_TARGET_URL_GCP }}
+         databricks-host: https://416411475796958.8.gcp.databricks.com
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_GCP }}
          new-cluster-json: >
            {

@@ -13,13 +13,13 @@ jobs:
        with:
          local-notebook-path: RUNME.py
          git-commit: ${{ github.event.pull_request.head.sha }}
-         databricks-host: ${{ secrets.DEPLOYMENT_TARGET_URL_MSA }}
+         databricks-host: https://adb-984752964297111.11.azuredatabricks.net
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_MSA }}
          new-cluster-json: >
            {
              "num_workers": 1,
              "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2",
+             "node_type_id": "Standard_DS3_v2",
              "azure_attributes": {
                             "availability": "ON_DEMAND_AZURE",
                             "first_on_demand": 1

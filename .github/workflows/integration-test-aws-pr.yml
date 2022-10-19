@@ -14,7 +14,7 @@ jobs:
        with:
          local-notebook-path: RUNME.py
          git-commit: ${{ github.event.pull_request.head.sha }}
-         databricks-host: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+         databricks-host: https://e2-demo-west.cloud.databricks.com
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
          new-cluster-json: >
            {
