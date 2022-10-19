@@ -17,7 +17,7 @@ jobs:
        uses: databricks/run-notebook@v0
        with:
          local-notebook-path: RUNME.py
-         git-branch: main
+         git-commit: ${{ github.sha }}
          databricks-host: https://e2-demo-west.cloud.databricks.com
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
          new-cluster-json: >

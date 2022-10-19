@@ -16,7 +16,7 @@ jobs:
        uses: databricks/run-notebook@v0
        with:
          local-notebook-path: RUNME.py
-         git-branch: main
+         git-commit: ${{ github.sha }}
          databricks-host: https://adb-984752964297111.11.azuredatabricks.net
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_MSA }}
          new-cluster-json: >
