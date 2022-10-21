@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %md 
+# MAGIC You may find this series of notebooks at https://github.com/databricks-industry-solutions/esg-scoring on the `web-sync` branch. For more information about this solution accelerator, visit https://www.databricks.com/solutions/accelerators/esg.
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC <img src=https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/fs-lakehouse-logo-transparent.png width="600px">
 # MAGIC 
