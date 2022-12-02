@@ -62,7 +62,7 @@ In line with our commitment to give our shareholders a ‘Say on Climate’, we 
 
     def test_pdf_download(self):
         # testing connectivity to responsibility reports.com
-        url = 'https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NYSE_GS_2020.pdf'
+        url = 'https://www.responsibilityreports.com/HostedData/ResponsibilityReportArchive/g/NYSE_GS_2020.pdf'
         statements = extract_statements(download_csr(url))
         expected = 'goldman sachs 2020 sustainability reportintegrating sustainability with purpose across our business the future'
         self.assertTrue(statements[0].startswith(expected))
