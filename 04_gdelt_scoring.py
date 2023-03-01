@@ -120,7 +120,7 @@ plt.show()
 
 # MAGIC %md
 # MAGIC ## ESG scores
-# MAGIC We showed how the intelligence we have learned from CSR reports could be transfered into the world of news to better describe any article against a set of ESG policies. Using sentiment analysis (tone is part of the GDELT metadata), we aim at detecting how much more "positive" or "negative" a company is perceived across those machine learned policies. We create a score internal to each company across its 'E', 'S' and 'G' dimensions.
+# MAGIC We showed how the intelligence we have learned from CSR reports could be transferred into the world of news to better describe any article against a set of ESG policies. Using sentiment analysis (tone is part of the GDELT metadata), we aim at detecting how much more "positive" or "negative" a company is perceived across those machine learned policies. We create a score internal to each company across its 'E', 'S' and 'G' dimensions.
 
 # COMMAND ----------
 
@@ -190,7 +190,7 @@ display(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC On the left hand side, we see organizations consistently scoring higher using news analytics than CSR reports. Those companies may not disclose a lot of information as part of their yearly disclosures (and arguably may have a poor ESG score from rating agencies) but consistently do good. Their support to communities or environmental impact is noticed and positive. On the right hand side come organisations disclosing more than actually doing or organisations constantly mentionned negatively in the press. However, you may notice that we did not take coverage bias into account here. Organisations mentioned more frequently than others may tend to have a more negative score due to the negative nature of news analytics. We leave this as an open thought for future solution. In spite of this caveat, this solution accelerator is providing you with the foundations required to adopt a data driven ESG framework that you could further extend.
+# MAGIC On the left hand side, we see organizations consistently scoring higher using news analytics than CSR reports. Those companies may not disclose a lot of information as part of their yearly disclosures (and arguably may have a poor ESG score from rating agencies) but consistently do good. Their support to communities or environmental impact is noticed and positive. On the right hand side come organisations disclosing more than actually doing or organisations constantly mentioned negatively in the press. However, you may notice that we did not take coverage bias into account here. Organisations mentioned more frequently than others may tend to have a more negative score due to the negative nature of news analytics. We leave this as an open thought for future solution. In spite of this caveat, this solution accelerator is providing you with the foundations required to adopt a data driven ESG framework that you could further extend.
 
 # COMMAND ----------
 

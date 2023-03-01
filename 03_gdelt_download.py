@@ -173,7 +173,7 @@ display(org_contribution.orderBy(F.desc('org_contribution')))
 
 # MAGIC %md
 # MAGIC ### Media contribution
-# MAGIC As most news articles would be mentioning more than one organization, we need a similar weighting strategy. Furthermore, many businesses (especially in the media industry) might be overindexed, resulting in irrelevant insights and probably low ESG scores. We use a simple term frequency analysis (TF-IDF) to understand the significance of each organization to a given article and attribute its impact proortionally. 
+# MAGIC As most news articles would be mentioning more than one organization, we need a similar weighting strategy. Furthermore, many businesses (especially in the media industry) might be overindexed, resulting in irrelevant insights and probably low ESG scores. We use a simple term frequency analysis (TF-IDF) to understand the significance of each organization to a given article and attribute its impact proportionally. 
 
 # COMMAND ----------
 
