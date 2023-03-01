@@ -21,7 +21,7 @@ csr_scores = config['database']['tables']['csr']['scores']
 # MAGIC %md
 # MAGIC ## Text preprocessing
 # MAGIC 
-# MAGIC We apply [latent dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) to learn topics descriptive to CSR reports. We want to be able to better understand and eventually sumarize complex CSR reports into a specific ESG related themes. Before doing so, we need to further process our text content (converting words into their simplest grammatical forms) for NLP analysis.
+# MAGIC We apply [latent dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) to learn topics descriptive to CSR reports. We want to be able to better understand and eventually summarize complex CSR reports into a specific ESG related themes. Before doing so, we need to further process our text content (converting words into their simplest grammatical forms) for NLP analysis.
 
 # COMMAND ----------
 
@@ -169,7 +169,7 @@ with mlflow.start_run(run_name='esg_lda') as run:
 
 # MAGIC %md
 # MAGIC ### Interpreting results
-# MAGIC We want to evaluate model relevance using more domain expertise. Would those topics make sense from an ESG perspective? Do we have clear categories defined spanning accross the Environmental, Social and Governance broader categories? By interacting with our model through simple visualization, we want to name each topic into a specific policy in line with [GRI standards](https://www.globalreporting.org/standards/).
+# MAGIC We want to evaluate model relevance using more domain expertise. Would those topics make sense from an ESG perspective? Do we have clear categories defined spanning across the Environmental, Social and Governance broader categories? By interacting with our model through simple visualization, we want to name each topic into a specific policy in line with [GRI standards](https://www.globalreporting.org/standards/).
 
 # COMMAND ----------
 

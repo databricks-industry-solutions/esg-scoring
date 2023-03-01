@@ -39,7 +39,7 @@ def save_csr_content(csr_data, i, n):
   df = pd.DataFrame(csr_data, columns=['organization', 'sector', 'ticker', 'url', 'content'])
   # create a new view
   sdf = spark.createDataFrame(df).filter(F.length('content') > 0)
-  # store bactch of records to delta table
+  # store batch of records to delta table
   sdf.write.format('delta').mode('append').saveAsTable(csr_table_bronze)
   print("Downloaded {}/{}".format(i + 1, n))
   # clean our checkpoint
