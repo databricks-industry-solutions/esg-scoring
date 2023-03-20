@@ -32,7 +32,7 @@ citigroup,https://www.responsibilityreports.com/Click/1515
 eurobank,https://www.responsibilityreports.com/Click/3126
 jpmorgan chase,https://www.responsibilityreports.com/Click/1278
 keybank,https://www.responsibilityreports.com/Click/1599
-laurentian bank of canada,https://www.responsibilityreports.com/Click/1918
+laurentian bank of canada,https://www.responsibilityreports.com/HostedData/ResponsibilityReportArchive/l/TSX_LB_2021.pdf
 national australia bank,https://www.responsibilityreports.com/Click/1555
 pnc,https://www.responsibilityreports.com/Click/1829
 standard chartered,https://www.responsibilityreports.com/Click/2781
