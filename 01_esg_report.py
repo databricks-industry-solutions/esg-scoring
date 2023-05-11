@@ -6,7 +6,7 @@
 
 # MAGIC %md
 # MAGIC # CSR reports
-# MAGIC 
+# MAGIC
 # MAGIC Any large scale organisation is now facing tremendous pressure from their shareholders to disclose more information about their environmental, social and governance strategies. Typically released on their websites on a yearly basis as a form of a PDF document, companies communicate on their key ESG initiatives across multiple themes such as how they value their employees, clients or customers, how they positively contribute back to society or even how they reduce (or commit to reduce) their carbon emissions. Consumed by third parties agencies, these reports are usually consolidated and benchmarked across industries to create ESG metrics. In this notebook, we would like to programmatically access 40+ ESG reports from top tier financial services institutions and learn key ESG initiatives across different topics. 
 
 # COMMAND ----------
@@ -25,7 +25,6 @@ from io import StringIO
 import pandas as pd
 
 csv_str = """organisation,url
-discover,https://www.responsibilityreports.com/Click/2357
 equifax,https://www.responsibilityreports.com/Click/1346
 canadian imperial bank,https://www.responsibilityreports.com/Click/3811
 citigroup,https://www.responsibilityreports.com/Click/1515
@@ -104,7 +103,7 @@ organisations = set(list(org_df.toPandas().alias.apply(clean_org_name)) + list(o
 
 # MAGIC %md
 # MAGIC ## Learn topics
-# MAGIC 
+# MAGIC
 # MAGIC In this section, we apply [latent dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) to learn topics descriptive to CSR reports. Please note that the goal is to set the right foundations with a baseline model that can be further extended with different NLP techniques. We want to be able to better understand and eventually sumarize complex CSR reports into a specific ESG related themes (such as 'valuing employees'). Before doing so, we may want to consider additional stopwords that you may want to change to accomodate different industries or domain specific language
 
 # COMMAND ----------
