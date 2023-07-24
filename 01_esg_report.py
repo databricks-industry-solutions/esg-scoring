@@ -28,7 +28,6 @@ csv_str = """organisation,url
 equifax,https://www.responsibilityreports.com/Click/1346
 canadian imperial bank,https://www.responsibilityreports.com/Click/3811
 citigroup,https://www.responsibilityreports.com/Click/1515
-eurobank,https://www.responsibilityreports.com/Click/3126
 jpmorgan chase,https://www.responsibilityreports.com/Click/1278
 keybank,https://www.responsibilityreports.com/Click/1599
 laurentian bank of canada,https://www.responsibilityreports.com/HostedData/ResponsibilityReportArchive/l/TSX_LB_2021.pdf
