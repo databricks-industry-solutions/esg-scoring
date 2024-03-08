@@ -9,4 +9,5 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          echo pip install git+https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/databricks-industry-solutions/industry-solutions-release
+          echo ${GITHUB_ACTOR}
+          echo ${{ secrets.GITHUB_TOKEN }}
