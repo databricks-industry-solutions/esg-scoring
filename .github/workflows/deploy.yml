@@ -1,7 +1,7 @@
 name: publish
 
 env:
-  DB_PROFILE: ${{ secrets.DB_PROFILE }}
+  DB_PROFILES: ${{ secrets.DB_PROFILES }}
 
 on:
   workflow_dispatch:
@@ -45,18 +45,16 @@ jobs:
         run: |
           
           import os
-          import json
-          from databricks.solution import Accelerator
+          import configparser
+          import io
           
-          environments = json.loads(os.environ['DB_PROFILES'])
-          if '${{ github.event.repository.db_profile }}' not in environments:
-            raise Exception('Profile is not supported. Please check secret information')
+          buf = io.StringIO(os.environ['DB_PROFILES'])
+          config = configparser.ConfigParser()
+          config.read_file(buf)
           
-          environment = environments['${{ github.event.repository.db_profile }}']
-
           Accelerator(
-            db_host=environment['host'],
-            db_token=environment['token'],
+            db_host=config['host'],
+            db_token=config['token'],
             db_path='${{ github.event.inputs.path }}',
             db_name='${{ github.event.repository.name }}',
           ).release()
