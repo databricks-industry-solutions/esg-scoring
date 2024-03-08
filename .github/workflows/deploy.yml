@@ -65,8 +65,8 @@ jobs:
           Accelerator(
             db_host=db_host,
             db_token=db_token,
-            db_path=${{ github.event.inputs.path }},
-            db_name=${{ github.event.repository.name }},
+            db_path='${{ github.event.inputs.path }}',
+            db_name='${{ github.event.repository.name }}',
           ).release()
 
         shell: python
