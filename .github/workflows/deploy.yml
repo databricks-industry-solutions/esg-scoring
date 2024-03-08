@@ -44,9 +44,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github".insteadOf https://github
-          echo ${GITHUB_ACTOR}
-          pip install git+https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/databricks-industry-solutions/industry-solutions-release
+          pip install git+https://github.com/databricks-industry-solutions/industry-solutions-release
 
       - name: Package solution accelerator
         run: |
