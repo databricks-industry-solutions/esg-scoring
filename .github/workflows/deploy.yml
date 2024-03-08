@@ -31,7 +31,7 @@ jobs:
         run: python -m pip install --upgrade pip
 
       - name: Install dependencies
-        run: pip install git+https://github.com/databricks-industry-solutions/industry-solutions-release
+        run: pip install git+https://${GH_TOKEN}@github.com/databricks-industry-solutions/industry-solutions-release
 
       - name: Publish solution accelerator
         run: |
