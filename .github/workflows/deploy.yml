@@ -49,14 +49,14 @@ jobs:
           import io
           from databricks.solutions import Accelerator
           
-          buf = io.StringIO(os.environ['DB_PROFILES'])
           config = configparser.ConfigParser()
-          config.read_file(buf)
+          config.read_file(io.StringIO(os.environ['DB_PROFILES']))
+          config = config['${{ github.event.repository.db_profile }}']
           
           Accelerator(
             db_host=config['host'],
             db_token=config['token'],
-            db_path='${{ github.event.inputs.path }}',
+            db_path='${{ github.event.inputs.db_path }}',
             db_name='${{ github.event.repository.name }}',
           ).release()
 
