@@ -34,17 +34,6 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v2
 
-      - name: Configure git
-        run: |
-          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-          git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
-
-      - name: Retrieve latest site
-        run: |
-          git subtree split --prefix site/ -b gh-pages
-          git push -f origin gh-pages:gh-pages
-          git branch -D gh-pages
-
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
@@ -60,13 +49,12 @@ jobs:
             ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
             ${{ runner.os }}-pip-
 
-      - name: Install pip
-        run: python -m pip install --upgrade pip
-
       - name: Install dependencies
-        run: pip install -U -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U -r requirements.txt
 
-      - name: Publish solution accelerator
+      - name: Package solution accelerator
         run: |
           db_host = ${{ github.event.inputs.environment }}
           if db_host == 'e2-demo-field-eng.cloud.databricks.com':
@@ -86,3 +74,11 @@ jobs:
             db_name=${{ github.event.repository.name }},
           ).release()
         shell: python
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
