@@ -16,7 +16,7 @@ on:
         required: true
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
