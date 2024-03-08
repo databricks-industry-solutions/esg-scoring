@@ -1,21 +1,16 @@
 name: publish
 
 env:
-  DB_AWS_DEMO_TOKEN: ${{ secrets.DB_AWS_DEMO_TOKEN }}
-  DB_AWS_FIELD_TOKEN: ${{ secrets.DB_AWS_FIELD_TOKEN }}
-  DB_GCP_TOKEN: ${{ secrets.DB_GCP_TOKEN }}
+  DB_PROFILE: ${{ secrets.DB_PROFILE }}
 
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        type: choice
+      db_profile:
+        type: string
         description: 'Databricks environment to publish HTML from'
-        options:
-          - e2-demo-field-eng.cloud.databricks.com
-          - e2-demo-west.cloud.databricks.com
-          - 6177827686947384.4.gcp.databricks.com
-      path:
+        default: DEMO
+      db_path:
         type: string
         description: 'Repository path on databricks environment'
         required: true
@@ -50,21 +45,18 @@ jobs:
         run: |
           
           import os
+          import json
           from databricks.solution import Accelerator
           
-          db_host = ${{ github.event.inputs.environment }}
-          if db_host == 'e2-demo-field-eng.cloud.databricks.com':
-            db_token = os.environ['DB_AWS_FIELD_TOKEN']
-          elif db_host == 'e2-demo-west.cloud.databricks.com':
-            db_token = os.environ['DB_AWS_DEMO_TOKEN']
-          elif db_host == '6177827686947384.4.gcp.databricks.com':
-            db_token = os.environ['DB_GCP_TOKEN']
-          else:
-            exit(1)
+          environments = json.loads(os.environ['DB_PROFILES'])
+          if '${{ github.event.repository.db_profile }}' not in environments:
+            raise Exception('Profile is not supported. Please check secret information')
           
+          environment = environments['${{ github.event.repository.db_profile }}']
+
           Accelerator(
-            db_host=db_host,
-            db_token=db_token,
+            db_host=environment['host'],
+            db_token=environment['token'],
             db_path='${{ github.event.inputs.path }}',
             db_name='${{ github.event.repository.name }}',
           ).release()
