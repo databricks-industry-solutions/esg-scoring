@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install git+https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/databricks-industry-solutions/industry-solutions-release.git
+          pip install git+https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/databricks-industry-solutions/industry-solutions-release
 
       - name: Publish solution accelerator
         run: |
