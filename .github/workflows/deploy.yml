@@ -1,0 +1,45 @@
+name: build
+
+env:
+  DB_TOKEN: ${{ secrets.DB_TOKEN }}
+  DB_HOST: ${{ secrets.DB_HOST }}
+  GH_TOKEN: ${{ github.token }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository_path:
+        description: 'Repository path on [$DB_HOST] environment'
+        required: true
+      solution_name:
+        description: 'Code name of the solution accelerator'
+        required: true
+
+jobs:
+  tests:
+    env:
+      PYTHON: '3.9'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+
+      - name: Install pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: pip install git+git@github.com:databricks-industry-solutions/industry-solutions-release.git
+
+      - name: Publish solution accelerator
+        run: |
+          from databricks.accelerator import Accelerator
+          import os
+          db_path = ${{ github.event.inputs.repository_path }}
+          db_name = ${{ github.event.inputs.solution_name }}
+          print(f'Publishing solution [{db_name}]')
+          accelerator = Accelerator(db_host=os.environ['DB_HOST'], db_token=os.environ['DB_TOKEN'])
+          accelerator.release(db_path, db_name)
+        shell: python
