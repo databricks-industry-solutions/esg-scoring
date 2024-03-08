@@ -1,5 +1,10 @@
 name: publish
 
+env:
+  DB_AWS_DEMO_TOKEN: ${{ secrets.DB_AWS_DEMO_TOKEN }}
+  DB_AWS_FIELD_TOKEN: ${{ secrets.DB_AWS_FIELD_TOKEN }}
+  DB_GCP_TOKEN: ${{ secrets.DB_GCP_TOKEN }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -50,23 +55,24 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -U -r requirements.txt
+        run: pip install git+https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/databricks-industry-solutions/industry-solutions-release
 
       - name: Package solution accelerator
         run: |
+          
+          import os
+          from databricks.solution import Accelerator
+          
           db_host = ${{ github.event.inputs.environment }}
           if db_host == 'e2-demo-field-eng.cloud.databricks.com':
-            db_token = ${{ secrets.DB_AWS_FIELD_TOKEN }}
+            db_token = os.environ['DB_AWS_FIELD_TOKEN']
           elif db_host == 'e2-demo-west.cloud.databricks.com':
-            db_token = ${{ secrets.DB_AWS_DEMO_TOKEN }}
+            db_token = os.environ['DB_AWS_DEMO_TOKEN']
           elif db_host == '6177827686947384.4.gcp.databricks.com':
-            db_token = ${{ secrets.DB_GCP_TOKEN }}
+            db_token = os.environ['DB_GCP_TOKEN']
           else:
             exit(1)
           
-          from databricks.solution import Accelerator
           Accelerator(
             db_host=db_host,
             db_token=db_token,
