@@ -51,7 +51,7 @@ jobs:
           
           config = configparser.ConfigParser()
           config.read_file(io.StringIO(os.environ['DB_PROFILES']))
-          print('HELLO')
+          print('${{ github.event.repository.db_profile }}')
           print(config.sections())
           if '${{ github.event.repository.db_profile }}' not in config.sections():
             raise Exception('Provided DB_PROFILE is not supported')
