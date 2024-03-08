@@ -15,6 +15,11 @@ on:
         description: 'Code name of the solution accelerator'
         required: true
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   tests:
     env:
