@@ -47,6 +47,7 @@ jobs:
           import os
           import configparser
           import io
+          from databricks.solutions import Accelerator
           
           buf = io.StringIO(os.environ['DB_PROFILES'])
           config = configparser.ConfigParser()
