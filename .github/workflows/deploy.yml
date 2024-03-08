@@ -9,7 +9,7 @@ on:
       db_profile:
         type: string
         description: 'Databricks environment to publish HTML from'
-        default: DEMO
+        default: 'DEMO'
       db_path:
         type: string
         description: 'Repository path on databricks environment'
