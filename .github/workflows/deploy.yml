@@ -51,12 +51,9 @@ jobs:
           
           config = configparser.ConfigParser()
           config.read_file(io.StringIO(os.environ['DB_PROFILES']))
-          print('Hello')
-          print(${{ github.event.repository.db_profile }})
-          print(config.sections())
-          if ${{ github.event.repository.db_profile }} not in config.sections():
+          if '${{ github.event.inputs.db_profile }}' not in config.sections():
             raise Exception('Provided DB_PROFILE is not supported')
-          config = config['${{ github.event.repository.db_profile }}']
+          config = config['${{ github.event.inputs.db_profile }}']
           
           Accelerator(
             db_host=config['host'],
