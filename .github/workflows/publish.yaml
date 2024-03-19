@@ -14,6 +14,14 @@ on:
         type: string
         description: 'Repository path on databricks environment'
         required: true
+      split_markdown:
+        description: 'Splitting HTML by markdown'
+        type: choice
+        required: true
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: read
@@ -26,7 +34,7 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: html_publisher
     steps:
 
       - name: Checkout project
@@ -55,11 +63,14 @@ jobs:
             raise Exception('Provided DB_PROFILE is not supported')
           config = config['${{ github.event.inputs.db_profile }}']
           
+          split_markdown = '${{ github.event.inputs.split_markdown }}' == 'true'
+          
           Accelerator(
             db_host=config['host'],
             db_token=config['token'],
             db_path='${{ github.event.inputs.db_path }}',
             db_name='${{ github.event.repository.name }}',
+            markdown=split_markdown,
           ).release()
 
         shell: python
