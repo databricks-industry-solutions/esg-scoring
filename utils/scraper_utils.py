@@ -1,8 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-from PyPDF2 import PdfReader
+from pathlib import Path
 from io import BytesIO
-
 
 def get_organizations(sector):
     index_url = "https://www.responsibilityreports.com/Companies?sect={}".format(sector)
@@ -10,7 +9,6 @@ def get_organizations(sector):
     soup = BeautifulSoup(response.text, features="html.parser")
     csr_entries = [link.get('href') for link in soup.findAll('a')]
     organizations = [ele.split("/")[-1] for ele in csr_entries if ele.startswith('/Company/')]
-    print('Found {} organization(s)'.format(len(organizations)))
     return organizations
 
 
@@ -33,20 +31,10 @@ def get_organization_details(organization):
         return [name, ticker, csr_url]
     except:
         # a lot of things could go wrong here, simply ignore that record
-        return ["", "", ""]
+        return [None, None, None]
 
 
-def download_csr(url):
-    try:
-        # extract plain text from online PDF document
-        response = requests.get(url)
-        open_pdf_file = BytesIO(response.content)
-        reader = PdfReader(open_pdf_file)
-        number_of_pages = len(reader.pages)
-        # simply concatenate all pages as we'll clean it up later
-        text = [reader.pages[i].extract_text() for i in range(0, number_of_pages)]
-        return "\n".join(text)
-    except:
-        # a lot of things could go wrong here, simply ignore that record
-        # we found that < 10% of links could not be read because of different PDF encodings
-        return ""
+def download_csr(url, path):
+    response = requests.get(url)
+    filename = Path(path)
+    filename.write_bytes(response.content)

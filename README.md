@@ -1,8 +1,8 @@
 <img src=https://raw.githubusercontent.com/databricks-industry-solutions/.github/main/profile/solacc_logo.png width="600px">
 
-[![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/10.4ml.html)
-[![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?logo=googlecloud&style=for-the-badge)](https://databricks.com/try-databricks)
-[![POC](https://img.shields.io/badge/POC-10_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
+[![DBR](https://img.shields.io/badge/DBR-14.3ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/14.3ml.html)
+[![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?style=for-the-badge)](https://databricks.com/try-databricks)
+[![POC](https://img.shields.io/badge/POC-5_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
 
 *The future of finance goes hand in hand with social responsibility, environmental stewardship and corporate ethics. 
 In order to stay competitive, Financial Services Institutions (FSI)  are increasingly  disclosing more information 
@@ -24,17 +24,11 @@ ___
 
 ___
 
-&copy; 2022 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the Databricks License [https://databricks.com/db-license-source].  All included or referenced third party libraries are subject to the licenses set forth below.
+&copy; 2024 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the Databricks License [https://databricks.com/db-license-source].  All included or referenced third party libraries are subject to the licenses set forth below.
 
 | library                                | description             | license    | source                                              |
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
 | beautifulsoup4                         | Web scraper             | MIT        | https://www.crummy.com/software/BeautifulSoup       |
-| PyPDF2                                 | PDF parser              | BSD        | https://pypi.org/project/PyPDF2                     |
 | NLTK                                   | NLP toolkit             | Apache2    | https://github.com/nltk/nltk                        |
 | Spacy                                  | NLP toolkit             | MIT        | https://spacy.io/                                   |
-| Wordcloud                              | Visualization           | MIT        | https://github.com/amueller/word_cloud              |
-| PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
-| spark-gdelt                            | GDELT wrapper           | Apache2    | https://github.com/aamend/spark-gdelt               |
-
-## Instruction
-To run this accelerator, clone this repo into a Databricks workspace. Switch to the `web-sync` branch if you would like to run the version of notebooks currently published on the Databricks website. Attach the `RUNME` notebook to any cluster running a DBR 11.0 or later runtime, and execute the notebook via Run-All. A multi-step-job describing the accelerator pipeline will be created, and the link will be provided. Execute the multi-step-job to see how the pipeline runs. The job configuration is written in the RUNME notebook in json format. The cost associated with running the accelerator is the user's responsibility.
+| tika-ocr                               | Extracting text         | Databricks | https://github.com/databrickslabs/tika-ocr          |

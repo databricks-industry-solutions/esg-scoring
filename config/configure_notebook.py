@@ -1,5 +1,37 @@
 # Databricks notebook source
 # MAGIC %pip install -r requirements.txt
+# MAGIC %pip uninstall -y pydantic # Issue with spacy library
+# MAGIC %pip install pydantic
+# MAGIC dbutils.library.restartPython()
+
+# COMMAND ----------
+
+############ UPDATE CONFIGURATION AS REQUIRED
+ 
+catalog_name = 'industry_solutions'
+schema_name = 'esg_scoring'
+cache_volume = 'cache' 
+data_volume = 'data' 
+gkg_marketplace_table = 'esg_gdelt.cx13214.`gkg_v1_daily__aqlonmvwi0cqjpbr9ajyg-vvaq`'
+model_name = 'esg_lda'
+num_executors = 6
+
+# COMMAND ----------
+
+csr_table_content = f'{catalog_name}.{schema_name}.csr_content'
+csr_table_statement = f'{catalog_name}.{schema_name}.csr_statement'
+csr_table_topics = f'{catalog_name}.{schema_name}.csr_topic'
+csr_table_scores = f'{catalog_name}.{schema_name}.csr_scores'
+csr_table_gold = f'{catalog_name}.{schema_name}.csr_gold'
+
+gdelt_bronze_table = f'{catalog_name}.{schema_name}.gdelt'
+portfolio_table = f'{catalog_name}.{schema_name}.portfolio'
+
+spacy_path = f'/Volumes/{catalog_name}/{schema_name}/{cache_volume}/spacy'
+nltk_path = f'/Volumes/{catalog_name}/{schema_name}/{cache_volume}/nltk'
+data_path = f'/Volumes/{catalog_name}/{schema_name}/{data_volume}'
+
+model_registered_name = f'{catalog_name}.{schema_name}.{model_name}'
 
 # COMMAND ----------
 
@@ -8,23 +40,10 @@ warnings.filterwarnings("ignore")
 
 # COMMAND ----------
 
-import yaml
-with open('config/application.yaml', 'r') as f:
-  config = yaml.safe_load(f)
-
-# COMMAND ----------
-
-dbutils.fs.mkdirs(config['database']['path'])
-_ = sql("CREATE DATABASE IF NOT EXISTS {} LOCATION '{}'".format(
-  config['database']['name'], 
-  config['database']['path']
-))
-
-# COMMAND ----------
-
-# use our newly created database by default
-# each table will be created as a MANAGED table under this directory
-_ = sql("USE {}".format(config['database']['name']))
+_ = sql(f'CREATE CATALOG IF NOT EXISTS {catalog_name}')
+_ = sql(f'CREATE DATABASE IF NOT EXISTS {catalog_name}.{schema_name}')
+_ = sql(f'CREATE VOLUME IF NOT EXISTS {catalog_name}.{schema_name}.{cache_volume}')
+_ = sql(f'CREATE VOLUME IF NOT EXISTS {catalog_name}.{schema_name}.{data_volume}')
 
 # COMMAND ----------
 
@@ -32,9 +51,6 @@ import os
 import spacy 
 import nltk
 
-# we expect models to be available on a mounted directory accessible by all executors
-# one can call those methods to download models if needed
-spacy_path = config['model']['spacy']['path']
 if not os.path.exists(spacy_path):
   print("Downloading SPACY model to {}".format(spacy_path))
   os.mkdir(spacy_path)
@@ -42,40 +58,9 @@ if not os.path.exists(spacy_path):
   nlp = spacy.load('en_core_web_sm')
   nlp.to_disk(spacy_path)
 
-nltk_path = config['model']['nltk']['path']
 if not os.path.exists(nltk_path):
   print("Downloading NLTK model to {}".format(nltk_path))
   os.mkdir(nltk_path)
   nltk.download('wordnet', download_dir="{}/wordnet".format(nltk_path))
   nltk.download('punkt', download_dir="{}/punkt".format(nltk_path))
   nltk.download('omw-1.4', download_dir="{}/omw".format(nltk_path))
-
-# COMMAND ----------
-
-with open('config/portfolio.txt', 'r') as f:
-  portfolio = f.read().split('\n')
-
-# COMMAND ----------
-
-import mlflow
-username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-mlflow.set_experiment('/Users/{}/esg-scoring'.format(username))
-
-# COMMAND ----------
-
-# np.random.RandomState was deprecated, so Hyperopt now uses np.random.Generator
-import hyperopt
-import numpy as np
-
-if hyperopt.__version__.split('+')[0] > '0.2.5':
-  rstate=np.random.default_rng(123)
-else:
-  rstate=np.random.RandomState(123)
-
-# COMMAND ----------
-
-def teardown():
-  _ = sql("DROP DATABASE IF EXISTS {} CASCADE".format(config['database']['name']))
-  dbutils.fs.rm(config['database']['path'], True)
-  dbutils.fs.rm(config['model']['spacy']['path'], True)
-  dbutils.fs.rm(config['model']['nltk']['path'], True)

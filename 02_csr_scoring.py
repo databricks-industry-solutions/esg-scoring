@@ -9,18 +9,9 @@
 
 # COMMAND ----------
 
-model_name = config['model']['name']
-csr_gold   = config['database']['tables']['csr']['gold']
-csr_bronze = config['database']['tables']['csr']['bronze']
-csr_silver = config['database']['tables']['csr']['silver']
-csr_topics = config['database']['tables']['csr']['topics']
-csr_scores = config['database']['tables']['csr']['scores']
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## Text preprocessing
-# MAGIC 
+# MAGIC
 # MAGIC We apply [latent dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) to learn topics descriptive to CSR reports. We want to be able to better understand and eventually summarize complex CSR reports into a specific ESG related themes. Before doing so, we need to further process our text content (converting words into their simplest grammatical forms) for NLP analysis.
 
 # COMMAND ----------
@@ -39,19 +30,19 @@ def lemmatize(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
 # COMMAND ----------
 
 from pyspark.sql import functions as F
-csr_df = spark.read.table(csr_silver)
+csr_df = spark.read.table(csr_table_statement).join(spark.read.table(portfolio_table), ['ticker'])
 esg_df = csr_df.withColumn('lemma', lemmatize(F.col('statement')))
 esg_df = esg_df.filter(F.length('lemma') > 255)
 corpus = esg_df.select('lemma').toPandas().lemma
 
 # COMMAND ----------
 
-display(esg_df.select('organization', 'sector', 'statement'))
+display(esg_df.select('ticker', 'sector', 'lemma'))
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Hyperparameter tuning
+# MAGIC ## Extracting topics
 # MAGIC The challenge of topic modelling is to extract good quality of topics that are clear and meaningful. This depends heavily on the quality of text preprocessing (above), the amount of data to learn from and the strategy of finding the optimal number of topics (below). With more data (more PDFs), we may learn more meaningful insights. With industry specific ESG reports, we may learn industry specific ESG initiatives as opposition to broader catagories. We highly recommend starting small with the following code snippet and further extend this framework with more data / more specific data accordingly. In the cell below, we will be using `hyperopts` to tune parameters of a [LDA](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model.
 
 # COMMAND ----------
@@ -73,6 +64,17 @@ vec_model = vectorizer.fit(corpus)
 # COMMAND ----------
 
 corpus_B = sc.broadcast(corpus)
+
+# COMMAND ----------
+
+# np.random.RandomState was deprecated, so Hyperopt now uses np.random.Generator
+import hyperopt
+import numpy as np
+
+if hyperopt.__version__.split('+')[0] > '0.2.5':
+  rstate=np.random.default_rng(123)
+else:
+  rstate=np.random.RandomState(123)
 
 # COMMAND ----------
 
@@ -110,7 +112,7 @@ search_space = {
 }
 
 # we define the number of executors we have at our disposal
-spark_trials = SparkTrials(parallelism=config['environment']['executors'])
+spark_trials = SparkTrials(parallelism=num_executors)
 
 # we retrieve the set of parameters that minimize our loss function
 best_params = fmin(
@@ -140,7 +142,7 @@ corpus_B.unpersist(blocking=True)
 import mlflow
 from sklearn.pipeline import make_pipeline
 
-with mlflow.start_run(run_name='esg_lda') as run:
+with mlflow.start_run(run_name=model_name) as run:
 
   lda = LatentDirichletAllocation(
     n_components=int(best_params['n_components']),
@@ -168,8 +170,122 @@ with mlflow.start_run(run_name='esg_lda') as run:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Interpreting results
-# MAGIC We want to evaluate model relevance using more domain expertise. Would those topics make sense from an ESG perspective? Do we have clear categories defined spanning across the Environmental, Social and Governance broader categories? By interacting with our model through simple visualization, we want to name each topic into a specific policy in line with [GRI standards](https://www.globalreporting.org/standards/).
+# MAGIC ## Interpreting results
+# MAGIC We want to evaluate model relevance using more domain expertise. Would those topics make sense from an ESG perspective? Do we have clear categories defined across the Environmental, Social and Governance categories? By interacting with our model through simple visualization, we may want to name each topic into a specific policy in line with [GRI standards](https://www.globalreporting.org/standards/). Better, why not leveraging Generative AI capabilities to define our taxonomy? As an introductory solution, we report below a simple usage of DBRX model to name each topic we have discovered through our machine learning model. The logical extension of this solution would be to fine tune our foundational model against GRI standards. 
+
+# COMMAND ----------
+
+vocab = vectorizer.get_feature_names_out()
+for topic, comp in enumerate(lda.components_): 
+    word_idx = np.argsort(comp)[::-1][:100]
+    print(f'******************* TOPIC {topic} *******************')
+    print(' '.join([vocab[i] for i in word_idx]))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC We report the significant keywords describing each topic. These keywords will be brought as a context to a genAI model.
+
+# COMMAND ----------
+
+topic_keywords = []
+vocab = vectorizer.get_feature_names_out()
+for topic, comp in enumerate(lda.components_): 
+    word_idx = np.argsort(comp)[::-1][:100]
+    topic_keywords.append([vocab[i] for i in word_idx])
+
+# COMMAND ----------
+
+from langchain import FewShotPromptTemplate
+from langchain import PromptTemplate
+
+topics_prompt_tmpl = """###
+[topic]: {topic_id}
+[keywords]: {topic_keywords}
+"""
+
+prefix = """An analyst has been able to extract {num_topics} distinct topics from multiple corporate sustainability reports.
+You are trying to find the best keyword that describes each topic. 
+This taxonomy was expressed as a form of important keywords for each topic as represented below
+
+"""
+
+topic_prompt = PromptTemplate(
+  input_variables=['topic_id', 'topic_keywords'],
+  template=topics_prompt_tmpl
+)
+
+def build_topics_prompt(xs):
+  topics = []
+  for topic_id, topic_keywords in enumerate(xs):
+    topics.append({'topic_id': topic_id, 'topic_keywords': ','.join(topic_keywords)})
+  return topics
+
+few_shot_prompt_template = FewShotPromptTemplate(
+  examples=build_topics_prompt(topic_keywords),
+  example_prompt=topic_prompt,
+  prefix=prefix,
+  suffix='',
+  input_variables=['num_topics'],
+  example_separator="\n"
+)
+
+system_prompt = few_shot_prompt_template.format(
+  num_topics=int(best_params['n_components'])
+).strip()
+
+# COMMAND ----------
+
+def query_gen_ai(system, user, temperature=0.1, max_tokens=200):
+  chat_response = client.predict(
+      endpoint="databricks-dbrx-instruct",
+      inputs={
+          "messages": [
+              {
+                "role": "system",
+                "content": system_prompt
+              },
+              {
+                "role": "user",
+                "content": user_prompt
+              }
+          ],
+          "temperature": temperature,
+          "max_tokens": max_tokens
+      }
+  )
+  return chat_response['choices'][-1]['message']['content']
+
+# COMMAND ----------
+
+
+import mlflow.deployments
+client = mlflow.deployments.get_deploy_client("databricks")
+
+def get_topic_description(user_prompt):
+  return query_gen_ai(system_prompt, user_prompt)
+
+def get_topic_name(response):
+  import re
+  m = re.search('\"(.*)\"', response)
+  return m.group(1)
+
+topic_names = []
+for i in range(int(best_params['n_components'])):
+  user_prompt = f"How would you name topic {i}?"
+  topic_description = get_topic_description(user_prompt)
+  topic_name = get_topic_name(topic_description)
+  topic_names.append([i, topic_name, topic_description])
+
+# COMMAND ----------
+
+topic_df = pd.DataFrame(topic_names, columns=['id', 'policy', 'description'])
+display(topic_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC For validation purpose, we represent each topic we extracted from our PDF document alongside topic title we learned from our DBRX model.
 
 # COMMAND ----------
 
@@ -197,12 +313,13 @@ def word_cloud(model, tf_feature_names, index):
     ).generate(imp_words_topic)
     
 topics = len(lda.components_)
-tf_feature_names = vectorizer.get_feature_names()
+tf_feature_names = vectorizer.get_feature_names_out()
 fig = plt.figure(figsize=(20, 20 * topics / 3))
 
 # Display wordcloud for each extracted topic
 for i, topic in enumerate(lda.components_):
     ax = fig.add_subplot(topics, 3, i + 1)
+    ax.set_title(topic_names[i][1])
     wordcloud = word_cloud(lda, tf_feature_names, i)
     ax.imshow(wordcloud)
     ax.axis('off')
@@ -211,31 +328,12 @@ plt.savefig("/tmp/{}_wordcloud.png".format(model_name))
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ## Name ESG topics
-# MAGIC Although we were able to extract well defined topics that can describe initiatives in our CSR dataset, topics are meaningless unless overlayed with domain expertise. Please note that this naming convention below is only valid in the context of that experiment. In different settings, with different data, our model will yield different results and a different naming convention will apply.
-
-# COMMAND ----------
-
-import pandas as pd
-
-topic_df = pd.DataFrame([
-  [0, 'G', 'corporate disclosure'],
-  [1, 'G', 'global market'],
-  [2, 'E', 'environmental impact'],
-  [3, 'E', 'sustainable future'],
-  [4, 'G', 'corporate strategy'],
-  [5, 'S', 'supporting workforce']
-], columns=['id', 'topic', 'policy'])
-
-# COMMAND ----------
-
 _ = (
   spark.createDataFrame(topic_df)
     .write
     .format('delta')
     .mode('overwrite')
-    .saveAsTable(csr_topics)
+    .saveAsTable(csr_table_topics)
 )
 
 # COMMAND ----------
@@ -280,16 +378,16 @@ _ = (
     .write
     .format('delta')
     .mode('overwrite')
-    .saveAsTable(csr_gold)
+    .saveAsTable(csr_table_gold)
 )
 
 # COMMAND ----------
 
-_ = sql("OPTIMIZE {} ZORDER BY ticker".format(csr_gold))
+_ = sql("OPTIMIZE {} ZORDER BY ticker".format(csr_table_gold))
 
 # COMMAND ----------
 
-esg_group = spark.read.table(csr_gold).filter(F.col('ticker').isin(portfolio)).toPandas()
+esg_group = spark.read.table(csr_table_gold).toPandas()
 esg_group = esg_group.merge(topic_df, on='id')[['organization', 'policy', 'probability']]
 display(esg_group)
 
@@ -373,59 +471,41 @@ class EsgTopicAPI(mlflow.pyfunc.PythonModel):
 
 # COMMAND ----------
 
+from mlflow.models import infer_signature
+
+python_model = EsgTopicAPI(pipeline)
+model_input = pd.Series(['''creat social impact woman board woman suit woman leader woman team member bipoc board bipoc suit bipoc leader bipoc team member team member veteran disabl lgbtq 378m spend with small divers supplier includ 190m spend with supplier certifi major bipoc black indigen peopl color woman veteran peopl with disabl commit nonprofit organ focus advanc social justic divers equiti equal inclus health equiti resili healthcar increas over 2020 environment disclosuressoci govern healthcar environment social'''])
+model_output = python_model.predict(None, model_input)
+model_signature = infer_signature(model_input, model_output)
+model_signature
+
+# COMMAND ----------
+
 import sklearn
-
-with mlflow.start_run(run_name=model_name):
-
-  conda_env = mlflow.pyfunc.get_default_conda_env()
-  conda_env['dependencies'][2]['pip'] += ['scikit-learn=={}'.format(sklearn.__version__)]
-  conda_env['dependencies'][2]['pip'] += ['nltk=={}'.format(nltk.__version__)]
-  conda_env['dependencies'][2]['pip'] += ['pandas=={}'.format(pd.__version__)]
-  conda_env['dependencies'][2]['pip'] += ['numpy=={}'.format(np.__version__)]
-  
-  mlflow.pyfunc.log_model(
-    'pipeline', 
-    python_model=EsgTopicAPI(pipeline), 
-    conda_env=conda_env
-  )
-  
-  api_run_id = mlflow.active_run().info.run_id
-  print(api_run_id)
+conda_env = mlflow.pyfunc.get_default_conda_env()
+conda_env['dependencies'][2]['pip'] += ['scikit-learn=={}'.format(sklearn.__version__)]
+conda_env['dependencies'][2]['pip'] += ['nltk=={}'.format(nltk.__version__)]
+conda_env['dependencies'][2]['pip'] += ['pandas=={}'.format(pd.__version__)]
+conda_env['dependencies'][2]['pip'] += ['numpy=={}'.format(np.__version__)]
 
 # COMMAND ----------
 
-client = mlflow.tracking.MlflowClient()
-client.log_artifact(api_run_id, "/tmp/{}_heatmap.png".format(model_name))
-client.log_artifact(api_run_id, "/tmp/{}_wordcloud.png".format(model_name))
-model_uri = 'runs:/{}/pipeline'.format(api_run_id)
-result = mlflow.register_model(model_uri, model_name)
-version = result.version
+with mlflow.start_run(run_name=model_name) as run:
+    mlflow.pyfunc.log_model("model", 
+                            python_model=python_model, 
+                            signature=model_signature, 
+                            pip_requirements=conda_env,
+                            input_example=pd.DataFrame(model_input, columns=['data'])
+                            )
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC We can also promote our model to different stages programmatically. Although our models would need to be reviewed in real life scenario, we make it available as a production artifact for our next notebook and programmatically transition previous runs back to Archive.
+from mlflow.tracking import MlflowClient
 
-# COMMAND ----------
-
-client = mlflow.tracking.MlflowClient()
-for model in client.search_model_versions("name='{}'".format(model_name)):
-  if model.current_stage == 'Production':
-    print("Archiving model version {}".format(model.version))
-    client.transition_model_version_stage(
-      name=model_name,
-      version=int(model.version),
-      stage="Archived"
-    )
-
-# COMMAND ----------
-
-client = mlflow.tracking.MlflowClient()
-client.transition_model_version_stage(
-    name=model_name,
-    version=version,
-    stage="Production"
-)
+mlflow.set_registry_uri('databricks-uc')
+client = MlflowClient()
+latest_model = mlflow.register_model(f'runs:/{run.info.run_id}/model', model_registered_name)
+client.set_registered_model_alias(model_registered_name, "production", latest_model.version)
 
 # COMMAND ----------
 
@@ -443,7 +523,7 @@ num_orgs = sc.broadcast(len(organizations))
 csr_scores_df = (
   spark
     .read
-    .table(csr_gold)
+    .table(csr_table_gold)
     .groupBy('id', 'ticker', 'organization')
     .agg(F.sum('probability').alias('esg'))
     .withColumn('rank', F.row_number().over(Window.partitionBy('id').orderBy('esg')))
@@ -458,12 +538,12 @@ _ = (
     .write
     .format('delta')
     .mode('overwrite')
-    .saveAsTable(csr_scores)
+    .saveAsTable(csr_table_scores)
 )
 
 # COMMAND ----------
 
-_ = sql("OPTIMIZE {} ZORDER BY (ticker)".format(csr_scores))
+_ = sql("OPTIMIZE {} ZORDER BY (ticker)".format(csr_table_scores))
 
 # COMMAND ----------
 
@@ -472,16 +552,13 @@ _ = sql("OPTIMIZE {} ZORDER BY (ticker)".format(csr_scores))
 
 # COMMAND ----------
 
-organizations_df = spark.read.table(csr_bronze).select('ticker', 'organization')
 esg_csr_data = ( 
   csr_scores_df
     .join(spark.createDataFrame(topic_df), ['id'])
-    .join(organizations_df, ['ticker'])
-    .filter(F.col('ticker').isin(portfolio))
-    .groupBy('organization', 'topic')
+    .groupBy('ticker', 'policy')
     .agg(F.avg('score').alias('score'))
     .toPandas()
-    .pivot(index='organization', columns='topic', values='score')
+    .pivot(index='ticker', columns='policy', values='score')
 )
 
 # COMMAND ----------
@@ -491,7 +568,6 @@ esg_csr_data = esg_csr_data.sort_values(by='sum', ascending=False).drop('sum',  
 esg_csr_data.plot.bar(
   rot=90, 
   stacked=False, 
-  color={"E": "#A1D6AF", "S": "#D3A1D6", "G": "#A1BCD6"},
   title='ESG score based on corporate disclosures',
   ylabel='ESG score',
   ylim=[0, 100],

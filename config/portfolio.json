@@ -1,0 +1,92 @@
+[
+  {
+    "sector":"Technology companies",
+    "organization":"Amplitude, Inc.",
+    "ticker":"AMPL",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/a\/NASDAQ_AMPL_2022.pdf"
+  },
+  {
+    "sector":"Technology companies",
+    "organization":"Blackbaud Inc.",
+    "ticker":"BLKB",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/b\/NASDAQ_BLKB_2021.pdf"
+  },
+  {
+    "sector":"Technology companies",
+    "organization":"Nordic Semiconductor",
+    "ticker":"NDCVF",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/n\/OTC_NDCVF_2019.pdf"
+  },
+  {
+    "sector":"Energy",
+    "organization":"Enbridge Inc.",
+    "ticker":"ENB",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/e\/TSX_ENB_2021.pdf"
+  },
+  {
+    "sector":"Energy",
+    "organization":"EuroNav",
+    "ticker":"EURN",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/e\/NYSE_EURN_2019.pdf"
+  },
+  {
+    "sector":"Energy",
+    "organization":"Renewable Energy Group",
+    "ticker":"REGI",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/r\/NASDAQ_REGI_2020.pdf"
+  },
+  {
+    "sector":"Consumer goods",
+    "organization":"Knoll Inc",
+    "ticker":"KNL",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/k\/NYSE_KNL_2019.pdf"
+  },
+  {
+    "sector":"Consumer goods",
+    "organization":"Tempur Pedic International Inc.",
+    "ticker":"TPX",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/t\/NYSE_TPX_2020.pdf"
+  },
+  {
+    "sector":"Consumer goods",
+    "organization":"The Children's Place Retail Stores Inc.",
+    "ticker":"PLCE",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/t\/NASDAQ_PLCE_2021.pdf"
+  },
+  {
+    "sector":"Financial Services",
+    "organization":"Ameriprise Financial Inc.",
+    "ticker":"AMP",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/a\/NYSE_AMP_2022.pdf"
+  },
+  {
+    "sector":"Financial Services",
+    "organization":"Equitable Group Inc.",
+    "ticker":"ETC",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/e\/TSX_ETC_2021.pdf"
+  },
+  {
+    "sector":"Financial Services",
+    "organization":"First American Financial Corp",
+    "ticker":"FAF",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/f\/NYSE_FAF_2021.pdf"
+  },
+  {
+    "sector":"Healthcare",
+    "organization":"Amerisourcebergen Corporation",
+    "ticker":"ABC",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/a\/NYSE_ABC_2021.pdf"
+  },
+  {
+    "sector":"Healthcare",
+    "organization":"AMN Healthcare Services Inc.",
+    "ticker":"AMN",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/a\/NYSE_AMN_2021.pdf"
+  },
+  {
+    "sector":"Healthcare",
+    "organization":"BeiGene, Ltd.",
+    "ticker":"BGNE",
+    "url":"https:\/\/www.responsibilityreports.com\/HostedData\/ResponsibilityReportArchive\/b\/NASDAQ_BGNE_2021.pdf"
+  }
+]

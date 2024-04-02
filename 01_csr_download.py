@@ -9,86 +9,53 @@
 
 # COMMAND ----------
 
-csr_table_bronze = config['database']['tables']['csr']['bronze']
-csr_table_silver = config['database']['tables']['csr']['silver']
+import pandas as pd
+portfolio = pd.read_json('config/portfolio.json')
+display(portfolio)
 
 # COMMAND ----------
 
-sectors = {
-  3 : 'Consumer goods',
-  4 : 'Financial Services',
-  5 : 'Healthcare',
-  7 : 'All Services',
-  8 : 'Technology companies',
-  24: 'Energy'
-}
+_ = spark.createDataFrame(portfolio).write.mode('overwrite').saveAsTable(portfolio_table)
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## Download CSRs
-# MAGIC We download text content for online CSR disclosures using the `PyPDF2` library. Please note that you will need to support outbound HTTP access from your databricks workspace. Although having a central place where to source data from (such as [responsibilityreports.com](https://www.responsibilityreports.com)) minimizes the amount of firewall rules to enable, this approach comes at a price: it prevents user from distributing that scraping logic across multiple executors. In our approach, we download data sequentially, checkpointing to delta every x PDF documents. Just like many web scraping processes, please proceed with extra caution and refer to responsibilityreports.com [T&Cs](https://www.responsibilityreports.com/Disclaimer) before doing so.
+# MAGIC We download text content for online CSR disclosures. Please note that you will need to support outbound HTTP access from your databricks workspace. Although having a central place where to source data from (such as [responsibilityreports.com](https://www.responsibilityreports.com)) minimizes the amount of firewall rules to enable, this approach comes at a price: it prevents user from distributing that scraping logic across multiple executors. In our approach, we download data sequentially. Just like many web scraping processes, please proceed with extra caution and refer to responsibilityreports.com [T&Cs](https://www.responsibilityreports.com/Disclaimer) before doing so.
 
 # COMMAND ----------
 
-from pyspark.sql import functions as F
-import pandas as pd
+import os
+import shutil
+import requests
+from pathlib import Path
 
-def save_csr_content(csr_data, i, n):
-  # create a dataframe for each batch of downloaded reports
-  df = pd.DataFrame(csr_data, columns=['organization', 'sector', 'ticker', 'url', 'content'])
-  # create a new view
-  sdf = spark.createDataFrame(df).filter(F.length('content') > 0)
-  # store batch of records to delta table
-  sdf.write.format('delta').mode('append').saveAsTable(csr_table_bronze)
-  print("Downloaded {}/{}".format(i + 1, n))
-  # clean our checkpoint
-  csr_data.clear()
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC In order to guarantee consistency between different releases and enable unit tests, we moved the scraper logic to an arbitrary python file loaded as `scraper_utils` module here.
+csr_urls = portfolio['url']
+for csr_url in csr_urls:
+  basename = os.path.basename(csr_url)
+  output_file = os.path.join(data_path, basename)
+  response = requests.get(csr_url)
+  filename = Path(output_file)
+  filename.write_bytes(response.content)
 
 # COMMAND ----------
 
-from utils.scraper_utils import *
-
-# COMMAND ----------
-
-for sector in sectors.keys():
-  
-  print('')
-  print('*'*50)
-  print('Accessing reports for [{}]'.format(sectors[sector]))
-  print('*'*50)
-  print('')
-  
-  csr_data = []
-  organizations = get_organizations(sector)
-  for i, organization in enumerate(organizations):
-    [name, ticker, url] = get_organization_details(organization)
-    content = download_csr(url)
-    csr_data.append([name, sectors[sector], ticker, url, content])
-    if i > 0 and i % config['csr']['batch_size'] == 0:
-      save_csr_content(csr_data, i, len(organizations))
-  if len(csr_data) > 0:
-    save_csr_content(csr_data,  i, len(organizations))
-
-# COMMAND ----------
-
-display(spark.read.table(csr_table_bronze))
+display(dbutils.fs.ls(data_path))
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Since we've stored many chunks of data, we may want to optimize our table and delete previous versions. This is done through the `OPTIMIZE` and `VACUUM` commands respectively, recently released to open source through our Delta 2.0 [announcement](https://databricks.com/blog/2022/06/30/open-sourcing-all-of-delta-lake.html).
+# MAGIC ## Tika text extraction
+# MAGIC Using [TikaInputFormat](https://github.com/databrickslabs/tika-ocr) library and tesseract binaries installed on each executor as an init script (optional), we can read any unstructured text as-is, extracting content type, text and metadata. Although this demo only focuses on PDF documents, Tika supports literally any single MIME type, from email, pictures, xls, html, powerpoints, scanned images, etc. Given our utility library installed on your cluster as an external [maven dependency](https://mvnrepository.com/artifact/com.databricks.labs/tika-ocr) and tesseract installed thanks to an init script (see `init.sh`), we abstracted most of its complexity away through a simple operation, `spark.read.format('tika')`
 
 # COMMAND ----------
 
-_ = sql("OPTIMIZE {}".format(csr_table_bronze))
-_ = sql("VACUUM {}".format(csr_table_bronze))
-display(spark.read.table(csr_table_bronze))
+csr_content = spark.read.format('tika').load(data_path).cache()
+display(csr_content)
+
+# COMMAND ----------
+
+_ = csr_content.write.mode('overwrite').saveAsTable(csr_table_content)
 
 # COMMAND ----------
 
@@ -98,41 +65,48 @@ display(spark.read.table(csr_table_bronze))
 
 # COMMAND ----------
 
-from pyspark.sql.functions import pandas_udf
+from pyspark.sql.functions import pandas_udf, udf
+from pyspark.sql.functions import col, length, explode
 from typing import Iterator
 import pandas as pd
 from utils.nlp_utils import *
 
+@udf('string')
+def get_file_name(url):
+    return os.path.basename(url)
+
 @pandas_udf('array<string>')
-def get_sentences_from_csr(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
+def extract_sentences(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
     load_nltk(nltk_path)
     for xs in batch_iter:
         yield xs.apply(extract_statements)
 
 # COMMAND ----------
 
-csr_raw_df = spark.read.table(csr_table_bronze)
-
-# COMMAND ----------
-
-from pyspark.sql.functions import col, length, explode
-
-display(
-  csr_raw_df
-    .withColumn('content', get_sentences_from_csr(col('content')))
-    .withColumn('statement', explode(col('content')))
-    .filter(length('statement') > 255)
-    .select('organization', 'ticker', 'sector', 'url', 'statement')
-    .write
-    .format('delta')
-    .mode('overwrite')
-    .saveAsTable(csr_table_silver)
+portfolio = spark.read.table(portfolio_table).select(
+  col('ticker'),
+  get_file_name('url').alias('file')
 )
 
 # COMMAND ----------
 
-_ = sql("OPTIMIZE {} ZORDER BY organization".format(csr_table_silver))
-display(spark.read.table(csr_table_silver))
+_ = (
+  csr_content
+    .withColumn('content', extract_sentences(col('contentText')))
+    .withColumn('statement', explode(col('content')))
+    .filter(length('statement') > 255)
+    .withColumn('file', get_file_name('path'))
+    .join(portfolio, ['file'])
+    .select('ticker', 'file', 'statement')
+    .write
+    .format('delta')
+    .mode('overwrite')
+    .saveAsTable(csr_table_statement)
+)
+
+# COMMAND ----------
+
+display(spark.read.table(csr_table_statement))
 
 # COMMAND ----------
 
