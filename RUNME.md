@@ -8,6 +8,9 @@ Given a synthetic portfolio (stored as json file on config folder), we download 
 Please ensure you installed [library](https://mvnrepository.com/artifact/com.databricks.labs/tika-ocr) as a maven dependency to your cluster
 ![maven](images/install_tika.png)
 
+We recommend leveraging tesseract binaries since text might be included in pictures. This can be done using [init](init.sh) script at cluster startup.
+![init](images/init_script.png)
+
 ## CSR scoring
 We extract dominant topics from CSR reports using simple LDA model fine tuned with hyperopts. We make use of DBRX model for naming each topic. Please ensure foundational model API is available on your workspace. 
 ![dbrx](images/use_dbrx.png)
