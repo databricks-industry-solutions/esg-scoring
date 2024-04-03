@@ -6,15 +6,19 @@
 
 # COMMAND ----------
 
-############ UPDATE CONFIGURATION AS REQUIRED
- 
-catalog_name = 'industry_solutions'
-schema_name = 'esg_scoring'
-cache_volume = 'cache' 
-data_volume = 'data' 
-gkg_marketplace_table = 'esg_gdelt.cx13214.`gkg_v1_daily__aqlonmvwi0cqjpbr9ajyg-vvaq`'
-model_name = 'esg_lda'
-num_executors = 6
+import json
+with open('config/config.json', 'r') as f:
+  config = json.loads(f.read())
+
+# COMMAND ----------
+
+catalog_name = config['catalog_name']
+schema_name = config['schema_name']
+cache_volume = config['cache_volume'] 
+data_volume = config['data_volume']
+gkg_marketplace_table = config['gkg_marketplace_table']
+model_name = config['model_name']
+num_executors = config['num_executors']
 
 # COMMAND ----------
 

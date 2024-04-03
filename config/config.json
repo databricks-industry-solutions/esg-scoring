@@ -1,0 +1,9 @@
+{
+  "catalog_name" : "industry_solutions",
+  "schema_name" : "esg_scoring",
+  "cache_volume" : "cache",
+  "data_volume" : "data",
+  "gkg_marketplace_table" : "esg_gdelt.cx13214.`gkg_v1_daily__aqlonmvwi0cqjpbr9ajyg-vvaq`",
+  "model_name" : "esg_lda",
+  "num_executors" : 6
+}
